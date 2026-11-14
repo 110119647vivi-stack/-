@@ -36,6 +36,52 @@
       outline: 3px solid #9db9a2;
       outline-offset: 3px;
     }
+    [hidden] { display: none !important; }
+    .auth-page {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px 18px;
+      background:
+        radial-gradient(ellipse at 15% 15%, rgba(218, 231, 216, .65), transparent 34%),
+        radial-gradient(ellipse at 90% 85%, rgba(232, 224, 206, .55), transparent 32%),
+        var(--paper);
+    }
+    .auth-card {
+      width: min(440px, 100%);
+      padding: clamp(26px, 7vw, 42px);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.94);
+      box-shadow: var(--shadow);
+    }
+    .auth-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
+    .auth-brand .brand-mark { width: 46px; height: 46px; }
+    .auth-card h1 { font-size: 29px; }
+    .auth-description { margin: 8px 0 25px; color: var(--muted); font-size: 14px; }
+    .auth-form { display: grid; gap: 14px; }
+    .auth-feedback {
+      min-height: 20px;
+      margin: 0;
+      color: var(--green-dark);
+      font-size: 12px;
+    }
+    .auth-feedback.is-error { color: #a24f4f; }
+    .auth-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .auth-button {
+      min-height: 44px;
+      border: 1px solid var(--green);
+      border-radius: 10px;
+      color: #fff;
+      background: var(--green);
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .auth-button.secondary { color: var(--green-dark); background: #fff; }
+    .auth-button:hover:not(:disabled) { background: var(--green-dark); color: #fff; }
+    .auth-button:disabled { opacity: .6; cursor: wait; }
+    .auth-note { margin: 18px 0 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
     .app-shell { min-height: 100vh; }
     .topbar {
       height: 76px;
@@ -59,7 +105,20 @@
     }
     .brand-name { font-size: 18px; font-weight: 750; letter-spacing: .04em; }
     .brand-caption { margin-top: 1px; color: var(--muted); font-size: 11px; letter-spacing: .08em; }
+    .topbar-actions { display: flex; align-items: center; gap: 16px; }
     .today-label { color: var(--muted); font-size: 13px; }
+    .account-email { max-width: 220px; overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+    .signout-button {
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: var(--green-dark);
+      background: #fff;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .signout-button:hover { background: var(--green-soft); }
     .page {
       width: min(1220px, calc(100% - 56px));
       margin: 0 auto;
@@ -239,7 +298,10 @@
     }
     @media (max-width: 680px) {
       .topbar { height: 68px; padding: 0 20px; }
-      .today-label { font-size: 11px; }
+      .topbar-actions { gap: 8px; }
+      .today-label { display: none; }
+      .account-email { max-width: 36vw; font-size: 10px; }
+      .signout-button { min-height: 32px; padding: 0 9px; font-size: 11px; }
       .page { width: calc(100% - 32px); padding: 30px 0 42px; }
       .welcome { align-items: start; margin-bottom: 20px; }
       .summary-grid { gap: 10px; margin-bottom: 16px; }
@@ -253,7 +315,10 @@
     }
     @media (max-width: 390px) {
       .brand-caption { display: none; }
-      .today-label { max-width: 130px; text-align: right; }
+      .brand { gap: 8px; }
+      .brand-mark { width: 34px; height: 34px; }
+      .brand-name { font-size: 16px; }
+      .account-email { max-width: 30vw; }
       .summary-card { padding: 14px; }
       .summary-label { font-size: 11px; }
       .expense-item { grid-template-columns: 34px minmax(0,1fr) auto 28px; gap: 7px; }
@@ -267,7 +332,36 @@
   </style>
 </head>
 <body>
-  <div class="app-shell">
+  <main class="auth-page" id="auth-view" aria-labelledby="auth-title">
+    <section class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-mark" aria-hidden="true">✿</div>
+        <div>
+          <p class="eyebrow">MY LITTLE LEDGER</p>
+          <h1 id="auth-title">小日子記帳</h1>
+        </div>
+      </div>
+      <p class="auth-description">登入後，手機與電腦就能一起查看你的記帳紀錄。</p>
+      <form class="auth-form" id="auth-form">
+        <div class="field">
+          <label for="auth-email">電子郵件</label>
+          <input id="auth-email" name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+        </div>
+        <div class="field">
+          <label for="auth-password">密碼</label>
+          <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="至少 8 個字元" required>
+        </div>
+        <p class="auth-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
+        <div class="auth-actions">
+          <button class="auth-button" id="login-button" type="submit">登入</button>
+          <button class="auth-button secondary" id="signup-button" type="button">建立帳號</button>
+        </div>
+      </form>
+      <p class="auth-note">第一次使用請建立帳號。如果收到確認信，點擊信中的連結後再回到此頁登入。</p>
+    </section>
+  </main>
+
+  <div class="app-shell" id="app-shell" hidden>
     <header class="topbar">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">✿</div>
@@ -276,7 +370,11 @@
           <div class="brand-caption">把日常，慢慢記下來</div>
         </div>
       </div>
-      <time class="today-label" id="today-label"></time>
+      <div class="topbar-actions">
+        <time class="today-label" id="today-label"></time>
+        <span class="account-email" id="account-email"></span>
+        <button class="signout-button" id="signout-button" type="button">登出</button>
+      </div>
     </header>
 
     <main class="page">
@@ -351,7 +449,7 @@
             </div>
             <div class="expense-list" id="expense-list" aria-live="polite"></div>
             <div class="list-footer">
-              <span class="data-note">紀錄保存在這台裝置的瀏覽器中</span>
+              <span class="data-note" id="sync-status" role="status" aria-live="polite">紀錄同步至雲端</span>
               <button class="export-button" id="export-button" type="button" disabled>
                 <span aria-hidden="true">↓</span> 匯出 CSV
               </button>
@@ -383,8 +481,10 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const STORAGE_KEY = "little-days-expenses-v1";
+    const SUPABASE_URL = "https://dkredbcmzsbacdwlegow.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_JO2uE_N8Hy1PqSb9065UTg_voYNPaR3";
     const categoryDetails = {
       餐飲: { icon: "🍜", color: "#88a58b" },
       交通: { icon: "🚇", color: "#8da9bb" },
@@ -396,51 +496,33 @@
       其他: { icon: "✨", color: "#aaa99a" }
     };
 
+    const authView = document.querySelector("#auth-view");
+    const appShell = document.querySelector("#app-shell");
+    const authForm = document.querySelector("#auth-form");
+    const authFeedback = document.querySelector("#auth-feedback");
+    const loginButton = document.querySelector("#login-button");
+    const signupButton = document.querySelector("#signup-button");
     const form = document.querySelector("#expense-form");
     const list = document.querySelector("#expense-list");
     const chart = document.querySelector("#category-chart");
     const toast = document.querySelector("#toast");
-    let toastTimer;
-    let expenses = loadExpenses();
-
-    function loadExpenses() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) return [];
-        const parsed = JSON.parse(saved);
-        if (!Array.isArray(parsed)) throw new Error("記帳資料格式不正確。");
-        return parsed.filter((item) =>
-          item &&
-          typeof item.id === "string" &&
-          typeof item.date === "string" &&
-          typeof item.title === "string" &&
-          typeof item.category === "string" &&
-          Number.isSafeInteger(item.amount) &&
-          item.amount > 0
-        );
-      } catch (error) {
-        console.error("讀取記帳資料失敗：", error);
-        showToast("讀取紀錄失敗，請確認瀏覽器儲存空間是否可用。");
-        return [];
-      }
-    }
-
-    function saveExpenses() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
-        return true;
-      } catch (error) {
-        console.error("儲存記帳資料失敗：", error);
-        showToast("無法儲存紀錄，請確認瀏覽器儲存空間是否足夠。");
-        return false;
-      }
-    }
+    const syncStatus = document.querySelector("#sync-status");
+    const toastTimer = { id: 0 };
+    const expenses = [];
+    let supabaseClient = null;
+    let activeUserId = null;
+    let hasLoadedExpenses = false;
 
     function showToast(message) {
       toast.textContent = message;
       toast.hidden = false;
-      window.clearTimeout(toastTimer);
-      toastTimer = window.setTimeout(() => { toast.hidden = true; }, 3200);
+      window.clearTimeout(toastTimer.id);
+      toastTimer.id = window.setTimeout(() => { toast.hidden = true; }, 3200);
+    }
+
+    function setAuthFeedback(message, isError = false) {
+      authFeedback.textContent = message;
+      authFeedback.classList.toggle("is-error", isError);
     }
 
     function formatCurrency(amount) {
@@ -450,6 +532,12 @@
     function formatDate(dateString) {
       const [year, month, day] = dateString.split("-").map(Number);
       return `${year}/${String(month).padStart(2, "0")}/${String(day).padStart(2, "0")}`;
+    }
+
+    function getLocalDate() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now.getTime() - offset).toISOString().slice(0, 10);
     }
 
     function currentMonthExpenses() {
@@ -468,9 +556,14 @@
     }
 
     function renderList() {
-      const sorted = [...expenses].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+      const sorted = [...expenses].sort((a, b) =>
+        b.date.localeCompare(a.date) || (b.createdAt || "").localeCompare(a.createdAt || "")
+      );
       if (sorted.length === 0) {
-        list.innerHTML = '<div class="empty-state"><div class="empty-state-icon" aria-hidden="true">🌼</div><p>還沒有記帳紀錄，從今天的第一筆開始吧。</p></div>';
+        const message = hasLoadedExpenses
+          ? "還沒有記帳紀錄，從今天的第一筆開始吧。"
+          : "目前無法載入雲端紀錄，請確認網路後重新整理。";
+        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon" aria-hidden="true">${hasLoadedExpenses ? "🌼" : "☁️"}</div><p>${message}</p></div>`;
         return;
       }
       list.replaceChildren(...sorted.map((item) => {
@@ -549,34 +642,247 @@
       renderChart();
     }
 
-    form.addEventListener("submit", (event) => {
+    async function refreshExpenses() {
+      if (!activeUserId) return false;
+      syncStatus.textContent = "雲端同步中…";
+      try {
+        const { data, error } = await supabaseClient
+          .from("expenses")
+          .select("id, expense_date, title, category, amount, created_at")
+          .order("expense_date", { ascending: false })
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        const loaded = data.map((record) => {
+          const amount = Number(record.amount);
+          if (!Number.isSafeInteger(amount) || amount <= 0 || !categoryDetails[record.category]) {
+            throw new Error("雲端紀錄格式不正確，請聯絡管理者檢查資料表設定。");
+          }
+          return {
+            id: record.id,
+            date: record.expense_date,
+            title: record.title,
+            category: record.category,
+            amount,
+            createdAt: record.created_at
+          };
+        });
+        expenses.splice(0, expenses.length, ...loaded);
+        hasLoadedExpenses = true;
+        syncStatus.textContent = "紀錄已同步至雲端";
+        render();
+        return true;
+      } catch (error) {
+        console.error("讀取雲端記帳紀錄失敗：", error);
+        syncStatus.textContent = "雲端同步失敗";
+        render();
+        showToast("無法同步紀錄，請檢查網路後重新整理。");
+        return false;
+      }
+    }
+
+    async function activateSession(session) {
+      const user = session?.user;
+      if (!user) {
+        activeUserId = null;
+        appShell.hidden = true;
+        authView.hidden = false;
+        return;
+      }
+      if (activeUserId === user.id && !appShell.hidden) return;
+      activeUserId = user.id;
+      document.querySelector("#account-email").textContent = user.email || "";
+      authView.hidden = true;
+      appShell.hidden = false;
+      await refreshExpenses();
+    }
+
+    function setAuthBusy(isBusy) {
+      loginButton.disabled = isBusy;
+      signupButton.disabled = isBusy;
+    }
+
+    function getAuthCredentials() {
+      const values = new FormData(authForm);
+      return {
+        email: String(values.get("email")).trim(),
+        password: String(values.get("password"))
+      };
+    }
+
+    function initializeApp() {
+      if (!window.supabase?.createClient) {
+        setAuthFeedback("登入服務載入失敗，請重新整理頁面或檢查網路連線。", true);
+        loginButton.disabled = true;
+        signupButton.disabled = true;
+        return;
+      }
+
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true
+        }
+      });
+
+      window.supabaseClient = supabaseClient;
+
+      authForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!authForm.reportValidity()) return;
+        setAuthBusy(true);
+        setAuthFeedback("正在登入…");
+        try {
+          const { email, password } = getAuthCredentials();
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          setAuthFeedback("");
+          await activateSession(data.session);
+        } catch (error) {
+          console.error("登入失敗：", error);
+          setAuthFeedback(`登入失敗：${error.message}`, true);
+        } finally {
+          setAuthBusy(false);
+        }
+      });
+
+      signupButton.addEventListener("click", async () => {
+        if (!authForm.reportValidity()) return;
+        setAuthBusy(true);
+        setAuthFeedback("正在建立帳號…");
+        try {
+          const { email, password } = getAuthCredentials();
+          const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: { emailRedirectTo: window.location.href }
+          });
+          if (error) throw error;
+          if (data.session) {
+            setAuthFeedback("");
+            await activateSession(data.session);
+          } else {
+            setAuthFeedback("帳號申請已送出。請前往電子郵件完成確認，再回到此頁登入。");
+          }
+        } catch (error) {
+          console.error("建立帳號失敗：", error);
+          setAuthFeedback(`建立帳號失敗：${error.message}`, true);
+        } finally {
+          setAuthBusy(false);
+        }
+      });
+
+      document.querySelector("#signout-button").addEventListener("click", async () => {
+        try {
+          const { error } = await supabaseClient.auth.signOut();
+          if (error) throw error;
+          expenses.splice(0);
+          hasLoadedExpenses = false;
+          setAuthFeedback("");
+          appShell.hidden = true;
+          authView.hidden = false;
+        } catch (error) {
+          console.error("登出失敗：", error);
+          showToast(`登出失敗：${error.message}`);
+        }
+      });
+
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_OUT") {
+          activeUserId = null;
+          expenses.splice(0);
+          hasLoadedExpenses = false;
+          appShell.hidden = true;
+          authView.hidden = false;
+        } else if (event === "SIGNED_IN") {
+          queueMicrotask(() => { void activateSession(session); });
+        }
+      });
+
+      supabaseClient.auth.getSession().then(({ data, error }) => {
+        if (error) {
+          console.error("確認登入狀態失敗：", error);
+          setAuthFeedback(`無法確認登入狀態：${error.message}`, true);
+          return;
+        }
+        return activateSession(data.session);
+      }).catch((error) => {
+        console.error("確認登入狀態失敗：", error);
+        setAuthFeedback(`無法確認登入狀態：${error.message}`, true);
+      });
+
+      window.addEventListener("focus", () => {
+        if (activeUserId) void refreshExpenses();
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && activeUserId) void refreshExpenses();
+      });
+    }
+
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (!form.reportValidity()) return;
+      if (!form.reportValidity() || !activeUserId) return;
       const formData = new FormData(form);
       const title = String(formData.get("title")).trim();
       const amount = Number(formData.get("amount"));
       const date = String(formData.get("date"));
       const category = String(formData.get("category"));
+      const submitButton = form.querySelector('button[type="submit"]');
       if (!title || !Number.isSafeInteger(amount) || amount <= 0 || !categoryDetails[category] || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
         showToast("請確認日期、項目與金額都填寫正確。");
         return;
       }
-      expenses.push({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, date, title, category, amount });
-      const saved = saveExpenses();
-      render();
-      form.reset();
-      document.querySelector("#expense-date").value = getLocalDate();
-      document.querySelector("#expense-title").focus();
-      if (saved) showToast("這筆日常已經記下來了 🌿");
+      submitButton.disabled = true;
+      try {
+        const { data, error } = await window.supabaseClient
+          .from("expenses")
+          .insert({ user_id: activeUserId, expense_date: date, title, category, amount })
+          .select("id, expense_date, title, category, amount, created_at")
+          .single();
+        if (error) throw error;
+        expenses.push({
+          id: data.id,
+          date: data.expense_date,
+          title: data.title,
+          category: data.category,
+          amount: Number(data.amount),
+          createdAt: data.created_at
+        });
+        hasLoadedExpenses = true;
+        syncStatus.textContent = "紀錄已同步至雲端";
+        render();
+        form.reset();
+        document.querySelector("#expense-date").value = getLocalDate();
+        document.querySelector("#expense-title").focus();
+        showToast("這筆日常已經記下來了 🌿");
+      } catch (error) {
+        console.error("新增雲端記帳紀錄失敗：", error);
+        showToast(`新增失敗：${error.message}`);
+      } finally {
+        submitButton.disabled = false;
+      }
     });
 
-    list.addEventListener("click", (event) => {
+    list.addEventListener("click", async (event) => {
       const button = event.target.closest(".delete-button");
-      if (!button) return;
-      expenses = expenses.filter((item) => item.id !== button.dataset.id);
-      const saved = saveExpenses();
-      render();
-      if (saved) showToast("已刪除這筆紀錄。");
+      if (!button || !activeUserId) return;
+      button.disabled = true;
+      try {
+        const { error } = await window.supabaseClient
+          .from("expenses")
+          .delete()
+          .eq("id", button.dataset.id)
+          .eq("user_id", activeUserId);
+        if (error) throw error;
+        const index = expenses.findIndex((item) => item.id === button.dataset.id);
+        if (index !== -1) expenses.splice(index, 1);
+        render();
+        showToast("已刪除這筆紀錄。");
+      } catch (error) {
+        console.error("刪除雲端記帳紀錄失敗：", error);
+        button.disabled = false;
+        showToast(`刪除失敗：${error.message}`);
+      }
     });
 
     document.querySelector("#export-button").addEventListener("click", () => {
@@ -600,19 +906,13 @@
       showToast("CSV 消費資料已匯出。");
     });
 
-    function getLocalDate() {
-      const now = new Date();
-      const offset = now.getTimezoneOffset() * 60000;
-      return new Date(now.getTime() - offset).toISOString().slice(0, 10);
-    }
-
     const now = new Date();
     document.querySelector("#today-label").textContent = new Intl.DateTimeFormat("zh-TW", {
       year: "numeric", month: "long", day: "numeric", weekday: "long"
     }).format(now);
     document.querySelector("#month-caption").textContent = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月的每一份小日常`;
     document.querySelector("#expense-date").value = getLocalDate();
-    render();
+    initializeApp();
   </script>
 </body>
 </html>
